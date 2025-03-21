@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -6,6 +5,8 @@ import Footer from '@/components/Footer';
 import CourseCard, { CourseProps } from '@/components/CourseCard';
 import Newsletter from '@/components/Newsletter';
 import { Filter, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import FilterSection from '@/components/FilterSection';
 
 // Sample course data
 const allCourses: CourseProps[] = [
@@ -123,7 +124,6 @@ const Courses = () => {
   useEffect(() => {
     let filtered = [...allCourses];
     
-    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -134,12 +134,10 @@ const Courses = () => {
       );
     }
     
-    // Filter by category
     if (selectedCategory !== "All") {
       filtered = filtered.filter(course => course.category === selectedCategory);
     }
     
-    // Filter by level
     if (selectedLevel !== "All") {
       filtered = filtered.filter(course => course.level === selectedLevel);
     }
@@ -152,7 +150,7 @@ const Courses = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <main className="flex-grow pt-24 md:pt-32">
         <section className="container px-6 mx-auto mb-12">
@@ -168,62 +166,27 @@ const Courses = () => {
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-muted-foreground" />
               </div>
-              <input
+              <Input
                 type="text"
                 placeholder="Search courses..."
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
-            <button
-              onClick={toggleFilters}
-              className="md:hidden flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-border"
-            >
-              <Filter className="h-5 w-5" />
-              Filters
-            </button>
           </div>
           
           <div className="flex flex-col md:flex-row gap-8">
-            <div className={`${showFilters ? 'block' : 'hidden'} md:block w-full md:w-64 space-y-6`}>
-              <div>
-                <h3 className="font-semibold mb-3">Categories</h3>
-                <div className="space-y-2">
-                  {categories.map((category) => (
-                    <label key={category} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        checked={selectedCategory === category}
-                        onChange={() => setSelectedCategory(category)}
-                        className="rounded-full text-primary focus:ring-primary"
-                      />
-                      <span className="text-sm">{category}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-3">Experience Level</h3>
-                <div className="space-y-2">
-                  {levels.map((level) => (
-                    <label key={level} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="level"
-                        checked={selectedLevel === level}
-                        onChange={() => setSelectedLevel(level)}
-                        className="rounded-full text-primary focus:ring-primary"
-                      />
-                      <span className="text-sm">{level}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <FilterSection
+              categories={categories}
+              levels={levels}
+              selectedCategory={selectedCategory}
+              selectedLevel={selectedLevel}
+              setSelectedCategory={setSelectedCategory}
+              setSelectedLevel={setSelectedLevel}
+              showFilters={showFilters}
+              toggleFilters={toggleFilters}
+            />
             
             <div className="flex-grow">
               {filteredCourses.length > 0 ? (
@@ -233,7 +196,7 @@ const Courses = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
+                <div className="text-center py-12 bg-background border border-border rounded-xl shadow-sm">
                   <h3 className="text-xl font-semibold mb-2">No courses found</h3>
                   <p className="text-muted-foreground">
                     Try adjusting your search or filter criteria
