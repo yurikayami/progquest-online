@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
+import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Calendar, BookOpen } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,111 +13,13 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion';
-
-// Sample lesson content data - this would normally come from an API
-const lessonContent = {
-  '1.1': {
-    id: '1.1',
-    title: 'History and Evolution of JavaScript',
-    courseId: 'javascript-fundamentals',
-    courseName: 'JavaScript Fundamentals',
-    duration: '15 min',
-    lastUpdated: 'April 2023',
-    nextLessonId: '1.2',
-    nextLessonTitle: 'Setting Up Your Development Environment',
-    content: [
-      {
-        type: 'heading',
-        text: 'The Birth of JavaScript'
-      },
-      {
-        type: 'paragraph',
-        text: 'JavaScript was created in 1995 by Brendan Eich while he was working at Netscape Communications Corporation. Remarkably, the initial version of JavaScript was developed in just 10 days. It was originally named "Mocha," then briefly "LiveScript," before finally being renamed "JavaScript" as a marketing decision to capitalize on the popularity of Java, despite the languages having very little in common.'
-      },
-      {
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2974&q=80',
-        alt: 'JavaScript code on a screen',
-        caption: 'JavaScript has evolved from a simple scripting language to a powerful programming language'
-      },
-      {
-        type: 'heading',
-        text: 'The Standardization of JavaScript'
-      },
-      {
-        type: 'paragraph',
-        text: 'In 1996, Netscape submitted JavaScript to ECMA International for standardization, leading to the creation of the ECMAScript specification. ECMAScript is the official name of the language, with JavaScript being the most well-known implementation. The first edition of ECMA-262 (ECMAScript 1) was published in June 1997.'
-      },
-      {
-        type: 'paragraph',
-        text: 'Since then, the language has gone through several versions:'
-      },
-      {
-        type: 'list',
-        items: [
-          'ECMAScript 2 (1998): Editorial changes only',
-          'ECMAScript 3 (1999): Added regular expressions, try/catch exception handling, and more',
-          'ECMAScript 4: Abandoned due to disagreements (never released)',
-          'ECMAScript 5 (2009): Added strict mode, JSON support, and various array methods',
-          'ECMAScript 6/ES2015 (2015): Major update with classes, modules, arrow functions, promises, and more',
-          'ECMAScript 2016-present: Annual releases with incremental improvements'
-        ]
-      },
-      {
-        type: 'heading',
-        text: 'The Browser Wars and JavaScript Compatibility'
-      },
-      {
-        type: 'paragraph',
-        text: 'In the late 1990s and early 2000s, different browsers implemented JavaScript in different ways, leading to compatibility issues that made web development challenging. Developers often had to write different code for different browsers.'
-      },
-      {
-        type: 'paragraph',
-        text: 'Libraries like jQuery (released in 2006) became popular as they abstracted away browser differences, allowing developers to write code that worked consistently across browsers.'
-      },
-      {
-        type: 'heading',
-        text: 'The Rise of Modern JavaScript'
-      },
-      {
-        type: 'paragraph',
-        text: 'The release of ECMAScript 6 (ES6) in 2015 marked a turning point for JavaScript, introducing many features that transformed it into a more powerful and expressive language. Modern JavaScript development is characterized by:'
-      },
-      {
-        type: 'list',
-        items: [
-          'Package managers like npm and Yarn',
-          'Build tools like Webpack and Babel',
-          'Frameworks like React, Angular, and Vue.js',
-          'Node.js for server-side JavaScript',
-          'TypeScript for static typing'
-        ]
-      },
-      {
-        type: 'heading',
-        text: 'JavaScript Today'
-      },
-      {
-        type: 'paragraph',
-        text: 'Today, JavaScript is one of the most popular programming languages in the world. It\'s the primary language for web development and has expanded beyond the browser to servers (Node.js), mobile apps (React Native), desktop apps (Electron), and even machine learning (TensorFlow.js).'
-      },
-      {
-        type: 'paragraph',
-        text: 'The language continues to evolve with regular annual updates, adding new features while maintaining backward compatibility. The JavaScript ecosystem is vast and vibrant, with millions of packages available on npm and a large community of developers contributing to its growth and development.'
-      },
-      {
-        type: 'quote',
-        text: 'Any application that can be written in JavaScript, will eventually be written in JavaScript.',
-        author: 'Jeff Atwood, co-founder of Stack Overflow'
-      }
-    ]
-  }
-};
+import { getLessonById } from '@/services/lessonContent';
 
 const LessonDetail = () => {
   const { courseId, lessonId } = useParams<{ courseId: string, lessonId: string }>();
   const location = useLocation();
-  const lesson = lessonContent[lessonId as keyof typeof lessonContent];
+  const navigate = useNavigate();
+  const lesson = getLessonById(lessonId || '');
   
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -195,7 +97,7 @@ const LessonDetail = () => {
                   } else if (item.type === 'list') {
                     return (
                       <ul key={index} className="list-disc pl-6 mb-6 space-y-2">
-                        {item.items.map((listItem, i) => (
+                        {item.items?.map((listItem, i) => (
                           <li key={i} className="text-gray-700">{listItem}</li>
                         ))}
                       </ul>
@@ -206,6 +108,12 @@ const LessonDetail = () => {
                         <p>{item.text}</p>
                         {item.author && <footer className="text-sm mt-2">— {item.author}</footer>}
                       </blockquote>
+                    );
+                  } else if (item.type === 'code') {
+                    return (
+                      <pre key={index} className="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">
+                        <code className="text-sm font-mono">{item.text}</code>
+                      </pre>
                     );
                   }
                   return null;
@@ -244,15 +152,17 @@ const LessonDetail = () => {
                     </AccordionTrigger>
                     <AccordionContent>
                       <ul className="space-y-3 pl-2">
-                        <li className="border-l-2 border-primary pl-4 py-1 font-medium">
-                          1.1 History and Evolution of JavaScript
+                        <li className={`border-l-2 pl-4 py-1 transition-colors ${lessonId === '1.1' ? 'border-primary font-medium' : 'border-transparent hover:border-muted hover:bg-muted/30'}`}>
+                          <Link to={`/courses/${courseId}/lessons/1.1`} className="block">
+                            1.1 History and Evolution of JavaScript
+                          </Link>
                         </li>
-                        <li className="border-l-2 border-transparent hover:border-muted hover:bg-muted/30 pl-4 py-1 transition-colors">
+                        <li className={`border-l-2 pl-4 py-1 transition-colors ${lessonId === '1.2' ? 'border-primary font-medium' : 'border-transparent hover:border-muted hover:bg-muted/30'}`}>
                           <Link to={`/courses/${courseId}/lessons/1.2`} className="block">
                             1.2 Setting Up Your Development Environment
                           </Link>
                         </li>
-                        <li className="border-l-2 border-transparent hover:border-muted hover:bg-muted/30 pl-4 py-1 transition-colors">
+                        <li className={`border-l-2 pl-4 py-1 transition-colors ${lessonId === '1.3' ? 'border-primary font-medium' : 'border-transparent hover:border-muted hover:bg-muted/30'}`}>
                           <Link to={`/courses/${courseId}/lessons/1.3`} className="block">
                             1.3 Your First JavaScript Program
                           </Link>
@@ -268,22 +178,22 @@ const LessonDetail = () => {
                     </AccordionTrigger>
                     <AccordionContent>
                       <ul className="space-y-3 pl-2">
-                        <li className="border-l-2 border-transparent hover:border-muted hover:bg-muted/30 pl-4 py-1 transition-colors">
+                        <li className={`border-l-2 pl-4 py-1 transition-colors ${lessonId === '2.1' ? 'border-primary font-medium' : 'border-transparent hover:border-muted hover:bg-muted/30'}`}>
                           <Link to={`/courses/${courseId}/lessons/2.1`} className="block">
                             2.1 Variables and Data Types
                           </Link>
                         </li>
-                        <li className="border-l-2 border-transparent hover:border-muted hover:bg-muted/30 pl-4 py-1 transition-colors">
+                        <li className={`border-l-2 pl-4 py-1 transition-colors ${lessonId === '2.2' ? 'border-primary font-medium' : 'border-transparent hover:border-muted hover:bg-muted/30'}`}>
                           <Link to={`/courses/${courseId}/lessons/2.2`} className="block">
                             2.2 Operators and Expressions
                           </Link>
                         </li>
-                        <li className="border-l-2 border-transparent hover:border-muted hover:bg-muted/30 pl-4 py-1 transition-colors">
+                        <li className={`border-l-2 pl-4 py-1 transition-colors ${lessonId === '2.3' ? 'border-primary font-medium' : 'border-transparent hover:border-muted hover:bg-muted/30'}`}>
                           <Link to={`/courses/${courseId}/lessons/2.3`} className="block">
                             2.3 Control Flow: Conditionals
                           </Link>
                         </li>
-                        <li className="border-l-2 border-transparent hover:border-muted hover:bg-muted/30 pl-4 py-1 transition-colors">
+                        <li className={`border-l-2 pl-4 py-1 transition-colors ${lessonId === '2.4' ? 'border-primary font-medium' : 'border-transparent hover:border-muted hover:bg-muted/30'}`}>
                           <Link to={`/courses/${courseId}/lessons/2.4`} className="block">
                             2.4 Control Flow: Loops
                           </Link>
