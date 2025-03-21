@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, User, BookOpen, Award } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Newsletter from '@/components/Newsletter';
@@ -11,7 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import { CourseProps } from '@/components/CourseCard';
 
-// Sample course data - this would normally come from an API
 const allCourses: CourseProps[] = [
   {
     id: "javascript-fundamentals",
@@ -51,7 +48,6 @@ const allCourses: CourseProps[] = [
   }
 ];
 
-// Course curriculum for JavaScript Fundamentals
 const javaScriptCurriculum = [
   {
     id: 1,
@@ -119,14 +115,13 @@ const CourseDetail = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const location = useLocation();
   const [course, setCourse] = useState<CourseProps | null>(null);
-  const [isExpanded, setIsExpanded] = useState<number[]>([1]); // Start with the first module expanded
-  
+  const [isExpanded, setIsExpanded] = useState<number[]>([1]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
   
   useEffect(() => {
-    // In a real app, this would be an API call
     const foundCourse = allCourses.find(c => c.id === courseId);
     if (foundCourse) {
       setCourse(foundCourse);
@@ -172,7 +167,6 @@ const CourseDetail = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow pt-24 md:pt-32">
-        {/* Course Header */}
         <section className="container px-6 mx-auto mb-12">
           <div className="mb-6">
             <Link to="/courses" className="inline-flex items-center text-primary hover:underline">
@@ -249,7 +243,6 @@ const CourseDetail = () => {
           </div>
         </section>
         
-        {/* Course Curriculum */}
         <section className="container px-6 mx-auto mb-12">
           <h2 className="text-2xl font-bold mb-6">Course Curriculum</h2>
           
@@ -287,7 +280,12 @@ const CourseDetail = () => {
                         <li key={lesson.id} className="flex justify-between items-center">
                           <div className="flex items-center">
                             <span className="mr-2 text-primary font-medium">{lesson.id}</span>
-                            <span>{lesson.title}</span>
+                            <Link 
+                              to={`/courses/${courseId}/lessons/${lesson.id}`}
+                              className="hover:text-primary hover:underline"
+                            >
+                              {lesson.title}
+                            </Link>
                           </div>
                           <span className="text-sm text-muted-foreground">{lesson.duration}</span>
                         </li>
